@@ -1,5 +1,4 @@
 ﻿using ClosedXML.Excel;
-using Nexcel.Helpers;
 using Nexcel.Interfaces;
 using Nexcel.Misc;
 using Nexcel.Utilities;
@@ -38,12 +37,6 @@ public class ExcelBuilder :
         return this;
     }
 
-    public IStyleableStage BoldHeaders(string? headerInitializationCell = ExcelBuilderConstants.DefaultHeadersInitializationCell)
-    {
-
-        return this;
-    }
-    
     public IBuildStage AsBuildable() => this;
 
     public byte[] Build()
@@ -55,7 +48,7 @@ public class ExcelBuilder :
         memoryStream.Seek(0, SeekOrigin.Begin);
         
         this._workbook.SaveAs(memoryStream);
-        this._workbook.Dispose();
+        this.Dispose();
 
         return memoryStream.ToArray();
     }
@@ -65,19 +58,14 @@ public class ExcelBuilder :
         ThrowIfWorkbookIsDisposed();
 
         this._workbook.SaveAs(path);
-        
-        this._workbook.Dispose();
+        this.Dispose();
     }
 
-    public void Dispose()
-    {
-        this._workbook.Dispose();
-    }
+    public void Dispose() => this._workbook.Dispose();
 
     private void ThrowIfWorkbookIsDisposed()
     {
         if (_workbook == null)
             throw new InvalidOperationException("Workbook instance has been disposed already");
     }
-
 }

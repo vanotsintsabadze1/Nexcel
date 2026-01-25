@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Nexcel.Helpers;
+namespace Nexcel.Utilities;
 
 internal static class ReflectionUtility
 {
