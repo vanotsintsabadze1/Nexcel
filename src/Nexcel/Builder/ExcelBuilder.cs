@@ -5,25 +5,20 @@ using Nexcel.Utilities;
 
 namespace Nexcel.Builder;
 
-public class ExcelBuilder : 
-    IInitializedWorkbookStage, 
-    IItemInitializationStage,
-    IStyleableStage,
-    IBuildStage,
-    IDisposable
+public class ExcelBuilder : IInitializedWorkbookStage, IInitializedWorksheetStage
 {
     private IXLWorkbook _workbook;
     private IXLWorksheet _focusedWorksheet;
 
     internal ExcelBuilder(IXLWorkbook workbook) => this._workbook = workbook;
     
-    public IItemInitializationStage AddWorksheet(string? sheetName = "Sheet1")
+    public IInitializedWorksheetStage AddWorksheet(string? sheetName = "Sheet1")
     {
         this._focusedWorksheet = this._workbook.AddWorksheet(sheetName);
         return this;
     }
 
-    public IStyleableStage InitializeByCollection<T>(
+    public IInitializedWorksheetStage InitializeByCollection<T>(
         IEnumerable<T> items, 
         string? headerInitializationStartCell = ExcelBuilderConstants.DefaultHeadersInitializationCell,
         string? initializationStartCell = ExcelBuilderConstants.DefaultItemInitializationCell)
@@ -37,7 +32,46 @@ public class ExcelBuilder :
         return this;
     }
 
-    public IBuildStage AsBuildable() => this;
+    public IInitializedWorkbookStage RemoveWorksheet(string? sheetName = null)
+    {
+        if (sheetName == null)
+        {
+            switch (_focusedWorksheet)
+            {
+                case null:
+                    throw new InvalidOperationException("No current focused worksheet exists. \n This is due to removing a worksheet previously and not focusing on other sheet or there was no worksheet at all");
+                case IXLWorksheet:
+                    this._workbook.Worksheets.Delete(_focusedWorksheet.Name);
+                    return this;
+                default:
+                    throw new InvalidOperationException($"Something went wrong while trying to remove a worksheet {sheetName}. If sheet name is null, then the active worksheet was not found");
+            }
+        }
+
+        var sheet = this._workbook.Worksheets.FirstOrDefault(ws => ws.Name == sheetName);
+
+        if (sheet != null)
+        {
+            this._workbook.Worksheets.Delete(sheetName);
+            return this;
+        }
+
+        throw new ArgumentException($"No worksheet was found with name {sheetName}");
+    }
+    
+    public IInitializedWorksheetStage SelectWorksheet(string sheetName)
+    {
+        this._focusedWorksheet = GetSheetByName(sheetName);
+        return this;
+    }
+
+    public IInitializedWorksheetStage SelectWorksheet(int sheetIndex)
+    {
+        this._focusedWorksheet = GetSheetByIndex(sheetIndex);
+        return this;
+    }
+
+    public IInitializedWorkbookStage Done() => this;
 
     public byte[] Build()
     {
@@ -67,5 +101,27 @@ public class ExcelBuilder :
     {
         if (_workbook == null)
             throw new InvalidOperationException("Workbook instance has been disposed already");
+    }
+
+    private IXLWorksheet GetSheetByName(string sheetName)
+    {
+        var sheet = this._workbook.Worksheets.FirstOrDefault(ws => ws.Name == sheetName);
+
+        if (sheet == null)
+            throw new ArgumentException($"Sheet with name {sheetName} does not exist");
+
+        return sheet;
+    }
+
+    private IXLWorksheet GetSheetByIndex(int sheetIndex)
+    {
+        try
+        {
+            return this._workbook.Worksheets.ToList()[sheetIndex];
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            throw new ArgumentException($"No sheet was found with index of: {sheetIndex}");
+        }
     }
 }

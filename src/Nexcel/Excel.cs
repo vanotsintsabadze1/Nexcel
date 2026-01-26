@@ -6,9 +6,5 @@ namespace Nexcel;
 
 public static class Excel
 {
-    public static IInitializedWorkbookStage CreateWorkbook()
-    {
-        var xlWorkbook = new XLWorkbook();
-        return new ExcelBuilder(xlWorkbook);
-    }
+    public static IInitializedWorkbookStage CreateWorkbook() => new ExcelBuilder(new XLWorkbook());
 }
