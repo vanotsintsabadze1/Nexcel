@@ -1,11 +1,12 @@
 ﻿using ClosedXML.Excel;
 using Nexcel.Interfaces;
 using Nexcel.Misc;
+using Nexcel.Models;
 using Nexcel.Utilities;
 
 namespace Nexcel.Builder;
 
-public class ExcelBuilder : IInitializedWorkbookStage, IInitializedWorksheetStage
+public partial class ExcelBuilder : IInitializedWorkbookStage, IInitializedWorksheetStage
 {
     private IXLWorkbook _workbook;
     private IXLWorksheet _focusedWorksheet;
@@ -96,32 +97,4 @@ public class ExcelBuilder : IInitializedWorkbookStage, IInitializedWorksheetStag
     }
 
     public void Dispose() => this._workbook.Dispose();
-
-    private void ThrowIfWorkbookIsDisposed()
-    {
-        if (_workbook == null)
-            throw new InvalidOperationException("Workbook instance has been disposed already");
-    }
-
-    private IXLWorksheet GetSheetByName(string sheetName)
-    {
-        var sheet = this._workbook.Worksheets.FirstOrDefault(ws => ws.Name == sheetName);
-
-        if (sheet == null)
-            throw new ArgumentException($"Sheet with name {sheetName} does not exist");
-
-        return sheet;
-    }
-
-    private IXLWorksheet GetSheetByIndex(int sheetIndex)
-    {
-        try
-        {
-            return this._workbook.Worksheets.ToList()[sheetIndex];
-        }
-        catch (ArgumentOutOfRangeException ex)
-        {
-            throw new ArgumentException($"No sheet was found with index of: {sheetIndex}");
-        }
-    }
 }
