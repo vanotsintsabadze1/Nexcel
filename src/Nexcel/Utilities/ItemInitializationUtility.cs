@@ -33,7 +33,7 @@ internal static class ItemInitializationUtility
         worksheet.Cell(initializationStartCell!).InsertData(items);
     }
 
-    private static string GetCellAddressLetter(string address)
+    internal static string GetCellAddressLetter(string address)
     {
         char? firstNumericalCharacter = address.FirstOrDefault(char.IsDigit);
         int? indexOfFirstNumericalCharacter = firstNumericalCharacter != null ? address.IndexOf(firstNumericalCharacter.Value) : null;

@@ -1,7 +1,6 @@
 ﻿using ClosedXML.Excel;
 using Nexcel.Interfaces;
 using Nexcel.Misc;
-using Nexcel.Models;
 using Nexcel.Utilities;
 
 namespace Nexcel.Builder;
